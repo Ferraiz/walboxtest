@@ -1,4 +1,5 @@
 import { Server } from "ws";
+import { chargerController } from './controllers';
 
 const port = Number(process.env.WS_PORT || 3100);
 
@@ -8,6 +9,6 @@ console.log("--- Starting websocket server");
 wss.on("connection", function connection(ws, req) {
   console.log(`--- Get connection from ${req.url}`);
   ws.on("message", function incomming(message) {
-    console.log("NNN message: ", message);
+    chargerController.wsIncommingMessage(message as string, req.url || '');
   });
 });
