@@ -1,5 +1,6 @@
 import { ServerError } from './server-type-error';
 import { typeErrors } from '../constants';
+import { validationInputError } from '../test-utils';
 
 describe(`Unit test for ServerError`, () => {
   test(`
@@ -12,7 +13,7 @@ describe(`Unit test for ServerError`, () => {
   `, () => {
     const message = 'This is a test message';
     const serverError = new ServerError(typeErrors.VALIDATION_INPUT, message);
-    const expected = expect.stringMatching(/^\[VALIDATION_INPUT\]##[0-9]{4}-[0-9]{1,2}-[0-9]{1,2} [0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2}::[0-9]{1,4}## Ivalid input object -- .*: .*$/gs);
+    const expected = expect.stringMatching(validationInputError);
 
     expect(serverError.customMessage).toEqual(expected);
   });

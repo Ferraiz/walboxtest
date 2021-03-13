@@ -1,4 +1,5 @@
 import { wsIncommingFacade } from './ws-incomming-charger-facade';
+import { validationInputError } from '../test-utils';
 
 describe('Test for wsIncommingFacade', () => {
   test(`
@@ -12,7 +13,7 @@ describe('Test for wsIncommingFacade', () => {
         }
       }
     );
-    const expected = expect.stringMatching(/^\[VALIDATION_INPUT\]##[0-9]{4}-[0-9]{1,2}-[0-9]{1,2} [0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2}::[0-9]{1,4}## Ivalid input object -- .*: .*$/gs);
+    const expected = expect.stringMatching(validationInputError);
 
     try {
       wsIncommingFacade.validateSchema(message);

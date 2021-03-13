@@ -1,4 +1,5 @@
 import { chargerIncommingFacade } from './charger-incomming-id-facade';
+import { validationChargerIdError } from '../test-utils';
 
 describe(`Test for chargerIncommingFacade`, () => {
   test(`
@@ -7,7 +8,7 @@ describe(`Test for chargerIncommingFacade`, () => {
     facade throw an exception
   `, (done) => {
     const url = '/path/got/in/incomming/message'
-    const expected = expect.stringMatching(/^\[VALIDATION_CHARGER_ID\]##[0-9]{4}-[0-9]{1,2}-[0-9]{1,2} [0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2}::[0-9]{1,4}## Charger id can not be found -- .*: .*$/gs);
+    const expected = expect.stringMatching(validationChargerIdError);
 
     try {
       chargerIncommingFacade.validateIdUrl(url);

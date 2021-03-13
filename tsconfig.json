@@ -14,9 +14,13 @@
     "strict": true,
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
+    "typeRoots": [
+      "./server/models",
+      "./node_modules/@types"
+    ]
   },
   "include": [
-    "./server/**/*"
+    "./server/**/*.ts"
   ],
   "exclude": [
     "./server/**/*.test.ts",
