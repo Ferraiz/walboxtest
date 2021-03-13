@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start:server": "nodemon ./server",
+    "start:server:debug": "node --inspect-brk --require ts-node/register ./server",
     "start:charger": "ts-node ./charger",
     "start:widget": "ts-node ./widget"
   },
