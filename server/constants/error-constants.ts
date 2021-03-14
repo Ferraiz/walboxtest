@@ -6,6 +6,7 @@ export enum typeErrors {
   MESSAGE_NOT_SENT = 'MESSAGE_NOT_SENT',
   WEBSOCKET_ERROR = 'WEBSOCKET_ERROR',
   VALIDATION_CHARGE_VALUE = 'VALIDATION_CHARGE_VALUE',
+  VALIDATION_DEVICE_ID = 'VALIDATION_DEVICE_ID'
 }
 
 export const errorMessage = {
@@ -15,5 +16,6 @@ export const errorMessage = {
   [typeErrors.DEVICE_ID_NOT_FOUND]: 'Device associated to charger not found',
   [typeErrors.MESSAGE_NOT_SENT]: 'Error sending the message',
   [typeErrors.WEBSOCKET_ERROR]: 'Error connecting with the device',
-  [typeErrors.VALIDATION_CHARGE_VALUE]: 'Invalid charge value'
+  [typeErrors.VALIDATION_CHARGE_VALUE]: 'Invalid charge value',
+  [typeErrors.VALIDATION_DEVICE_ID]: 'Device id can not be found',
 }
