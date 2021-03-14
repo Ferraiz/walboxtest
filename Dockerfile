@@ -1,9 +1,9 @@
 FROM node:14-alpine
 
-ENV APPLICATION_DIRECTORY /srv/app
-RUN mkdir $APPLICATION_DIRECTORY
-WORKDIR $APPLICATION_DIRECTORY
+WORKDIR /app
 
-ENV NODE_ENV development
+COPY ./dist ./dist
+COPY ./data ./data
+COPY ./node_modules ./node_modules
 
-CMD ["npm", "run", "start:server"]
+CMD [ "node", "./dist/index.js" ]
