@@ -1,83 +1,33 @@
-import WebSocket from 'ws';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { websocketMachineState } from '../constants';
+import { Subject, Observable } from 'rxjs';
+import { typeErrors } from '../constants';
+import { ServerError } from '../utils';
 
-export class WebsocketDatasource {
+class WebsocketDatasource {
 
-  private ws: WebSocket;
+  private connections: {[deviceId: string]: Subject<string>} = {};
 
-  private websocketState: BehaviorSubject<WsState> = new BehaviorSubject<WsState>({ state: websocketMachineState.DISCONNECTED });
+  public createConnection(deviceId: string): Observable<string> {
+    if (!this.connections[deviceId]) {
+      this.connections[deviceId] = new Subject<string>();
+    }
 
-  get stateObservable(): Observable<WsState> {
-    return this.websocketState.asObservable();
+    return this.connections[deviceId].asObservable();
   }
 
-  constructor(url: string) {
-    const self = this;
-    this.ws = new WebSocket(url);
-    this.ws.on('open', function open(err: Error) {
-      if (err) {
-        self.websocketState.next({
-          state: websocketMachineState.ERROR_CONNECTING,
-          payload: {
-            error: err
-          }
-        })
-      } else {
-        self.websocketState.next({
-          state: websocketMachineState.CONNECTED
-        })
-      }
-    });
+  public sendMessage(deviceId: string, message:string) {
+    if(!this.connections[deviceId]) {
+      throw new ServerError(typeErrors.WEBSOCKET_ERROR, `There is not a connection created for the device ${deviceId}`);
+    }
 
-    this.ws.on('error', function setError (err){
-      self.websocketState.next({
-        state: websocketMachineState.ERROR_SENDING_MESSAGE,
-        payload: {
-          error: err
-        }
-      });
-    });
-
-    this.ws.on('close', function closeState () {
-      self.websocketState.next({ state: websocketMachineState.DISCONNECTED });
-    });
+    this.connections[deviceId].next(message);
   }
 
-  public terminateConnection () {
-    this.ws.terminate();
-    this.websocketState.complete();
-  }
-
-  public sendMessage(message: string) {
-    const self = this;
-    const currentState = this.websocketState.value;
-
-    if (currentState.state !== websocketMachineState.DISCONNECTED && currentState.state !== websocketMachineState.SENDING_MESSAGE) {
-      this.websocketState.next({
-        state: websocketMachineState.SENDING_MESSAGE,
-        payload: {
-          message: message
-        }
-      });
-      
-      this.ws.send(message, function sendMessage(err) {
-        if (err) {
-          self.websocketState.next({
-            state: websocketMachineState.ERROR_SENDING_MESSAGE,
-            payload: {
-              error: err
-            }
-          });
-        } else {
-          self.websocketState.next({
-            state: websocketMachineState.MESSAGE_SENT,
-            payload: {
-              message,
-            }
-          });
-        }
-      });
+  public closeConnection (deviceId: string) {
+    if (this.connections[deviceId]) {
+      this.connections[deviceId].complete();
+      delete this.connections[deviceId];
     }
   }
 }
+
+export const websocketDatasource = new WebsocketDatasource();

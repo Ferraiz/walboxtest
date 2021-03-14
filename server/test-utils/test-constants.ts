@@ -4,3 +4,4 @@ export const readingDocumentError = /^\[ERROR_READING_DOCUMENT\]##[0-9]{4}-[0-9]
 export const deviceIdForChargerNotFoundError = /^\[DEVICE_ID_NOT_FOUND\]##[0-9]{4}-[0-9]{1,2}-[0-9]{1,2} [0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2}::[0-9]{1,4}## Device associated to charger not found -- .*: .*$/gs;
 export const deviceWebsocketError = /^\[WEBSOCKET_ERROR\]##[0-9]{4}-[0-9]{1,2}-[0-9]{1,2} [0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2}::[0-9]{1,4}## Error connecting with the device -- .*: .*$/gs;
 export const validateChargeValue = /^\[VALIDATION_CHARGE_VALUE\]##[0-9]{4}-[0-9]{1,2}-[0-9]{1,2} [0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2}::[0-9]{1,4}## Invalid charge value -- .*: .*$/gs;
+export const validateDeviceId = /^\[VALIDATION_DEVICE_ID\]##[0-9]{4}-[0-9]{1,2}-[0-9]{1,2} [0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2}::[0-9]{1,4}## Device id can not be found -- .*: .*$/gs;

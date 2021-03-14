@@ -1,6 +1,5 @@
-import { chargerIncommingFacade, wsIncommingFacade} from '../facades';
-import { chargerRepository } from '../repositories';
-
+import { chargerIncommingFacade, wsIncommingFacade, wsOutputDeviceFacade } from '../facades';
+import { chargerRepository, deviceRepository} from '../repositories';
 class ChargerController {
 
   public async wsIncommingMessage(message: string, url: string) {
@@ -8,13 +7,12 @@ class ChargerController {
       const incommingCharger: WsIncommingCharger = wsIncommingFacade.validateSchema(message);
       const idCharger:string = chargerIncommingFacade.validateIdUrl(url);
 
-      console.log('NNN incommingCharger: ', incommingCharger);
-      console.log('NNN idCharger: ', idCharger);
-
       const deviceId = await chargerRepository.getDeviceId(idCharger);
-      console.log('NNN deviceId: ', deviceId);
+      const outputMessage = wsOutputDeviceFacade.chargeValueValidator(incommingCharger.data.soc);
+
+      deviceRepository.sendMessageDevice(deviceId, outputMessage);
     } catch(err) {
-      console.error(err.customMessage);
+      console.error(err.customMessage || err.message);
     }
   }
 }
