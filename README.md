@@ -1,117 +1,34 @@
 # Node.js technical test
 
-## Context
+## Fast start
 
-Wallbox is thinking of diversifying its business, and for this, it is going to launch a new mobile recharge service for various events: music festivals and the like. We at Wallbox are very optimistic about the pandemic :D
+Step 1. Build the project running ```npm run build```
+Step 2. Start docker-compose with the command ```docker-compose up```
+Step 3. Check the traffic between chargers, devices and server in the logs
+Step 4. Clean the execution with the command ```docker-compose down```
 
-The charging process will be as follows:
+## Description of the e2e environment
+The e2e environment starts 8 websocket clients, four chargers, and four devices, each with a different ID. Each loader has a buffer with five * StateOfCharge * events. Some of them are well-formatted events and some were written to create an exception on the server and thus force the websocket connection to close. Each event is sent to an output buffer that sends the message to the server in order within 2 seconds of each other. When the server receives the event, it identifies the devices related to the charger, processes the message, and sends the response to the device.
 
-A customer approaches the Wallbox booth, hands over his mobile phone and in return receives a device that will indicate the status of the charging process. This device has a led that changes color depending on the state of the charge:
+The id of the chargers are set in the *docker-compose.yml* file with the environment variable *CHARGE_ID*. The id of the devices are set in similar way with the environment variable *DEVICE_ID*. The realtion between devices and chargers is defined in the file *./data/charger-document.json*
 
-     - red: charging
-     - yellow: charge level at least 80%
-     - green: fully charged
+## Charger websocket client
+The chargers are docker containers that run the code of a really simple websocket client that can be found in the next github repository:
+https://github.com/Ferraiz/chargeWS
 
-When the led turns green, the customer can return to the booth, pay for the service and exchange the device for their charged mobile phone.
+The chargers has a module called *messages.js* which contains a dictionar with an array of five *StateOfCharge* events per each charger id. These arrays are the ones that are stored in the delay buffers.
 
-## Your mission (if you decide to accept it)
+The steps to modify the server entries are as follows:
 
-Develop a server to which both chargers and devices will connect via websockets.
+Step 1. Choose the device id on which you want to change the event in the message.js file
+Step 2. Run docker build to create a new image on your local chargeWS machine
+Step 3. Update the chargeWS image name in the server's docker-compose.yml
+Step 4. Run `` `docker-compose up``` to check the result
 
-During the charging process, the charger periodically sends the charge level to the server.
+## My way to deploy the server in AWS
+If I were to deploy this service on AWS, I think I would implement it within a kubernetes cluster. The reasons are:
 
-The server processes these messages and sends a charging status to the device associated with that charger.
-
-Each charger has a unique device associated with it (for example, the charger _c1234_ is associated with the device _wABCD_)
-
-### Chargers
-
-Chargers connect to the server like this:
-
-```javascript
-const connection = new WebSocket('ws://localhost:3100/chargers/c1234');
-```
-
-where _c1234_ is the charger id.
-
-The messages that the chargers send us indicating their charge level (_State of Charge_) are as follows:
-
-```javascript
-connection.send(
-	JSON.stringify({
-		event: 'StateOfCharge',
-		data: {
-			soc: 70,
-		},
-	})
-);
-```
-
-### Devices
-
-Devices connect to the server like this:
-
-```javascript
-const connection = new WebSocket('ws://localhost:3200/widgets/wABCD');
-```
-
-where _wABCD_ is the device id.
-
-The devices receive messages from the server indicating the charging status (`charging`,` charging80`, and `charged`):
-
-```javascript
-{
-    event: "StateOfCharge",
-    data: {
-        status: "charging",
-    }
-}
-```
-
-The possible state of charge are:
-
-- `charging`
-- `charging80`: charge level at 80% or higher
-- `charged`: fully charged
-
-## Support tools
-
-To make your life easier, we have created some mocks of the charger (_charger_) and the device (_widget_). You should launch each one in a different terminal.
-
-### Charger mock
-
-```bash
-npm run start:charger
-```
-
-It connects to your server and allows you to send charge level messages.
-
-### Device mock
-
-```bash
-npm run start:widget
-```
-
-It connects to your server and displays the status it receives on the screen.
-
-## Aspects to consider:
-
-- It should take you about 4/5 hours to get it done. Your code should be simple, understandable, and conform to the statement. Do not do more than what is asked of you to do. We prefer you to deliver a functional server, to one with many design patterns, but that does not even start. Write down all the improvements that you would like to have added, and tell us about them in the interview.
-
-- (Node> = 12) && (JavaScript || TypeScript)
-
-- You may use any framework / library that you deem helpful in the development. The only requirement is that you use the _ws_ library (https://github.com/websockets/ws/) for the Websockets. The test could actually be done using just this library.
-
-- You don't need to use any database (SQL / NoSQL). The association between chargers and devices can be stored in memory, but make sure that the interface you use is similar to how you would use a database (especially make it asynchronous and try to minimize the number of requests). For this test, the _c1234_ charger will need to be associated with the _wABCD_ device.
-
-- We want you to include some E2E tests (charger -> server -> device), like: _When I receive a certain message from a charger, I should send this other message to the associated device_. You don't have to run a comprehensive test suite. We just want to see how you would do automatic testing with Websockets communications. Mocha or Jest, up to you.
-
-- Add instructions on how to run your code and launch the test suites. You may use Docker, although it is not necessary.
-
-- It would be very interesting if you added notes explaining the most important decisions you made.
-
-- [OPTIONAL] How would you deploy an application like this on AWS?
-
-- If you have any questions, ask away!
-
-- The purpose of this test is for us to be able to assess your technical level and serve as a basis for conversation during the interview. We know that it is not possible to perform miracles in such a short time.
+1. I already have it dockerized, so it would be nice to take advantage of all this work.
+2. Kubernetes provides many features to scale the service in case of increased demand.
+3. You can use lambda functions to implement this code, but the server must be running all the time to accept loaders and devices.
+connections and a kubernetes runtime is cheaper than the runtime of a lambda function, so economically kubernetes is more efficient.
