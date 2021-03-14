@@ -2,10 +2,10 @@
 
 ## Fast start
 
-Step 1. Build the project running ```npm run build```
-Step 2. Start docker-compose with the command ```docker-compose up```
-Step 3. Check the traffic between chargers, devices and server in the logs
-Step 4. Clean the execution with the command ```docker-compose down```
+1. Build the project running ```npm run build```
+2. Start docker-compose with the command ```docker-compose up```
+3. Check the traffic between chargers, devices and server in the logs
+4. Clean the execution with the command ```docker-compose down```
 
 ## Description of the e2e environment
 The e2e environment starts 8 websocket clients, four chargers, and four devices, each with a different ID. Each loader has a buffer with five * StateOfCharge * events. Some of them are well-formatted events and some were written to create an exception on the server and thus force the websocket connection to close. Each event is sent to an output buffer that sends the message to the server in order within 2 seconds of each other. When the server receives the event, it identifies the devices related to the charger, processes the message, and sends the response to the device.
