@@ -1,11 +1,90 @@
-version: '2'
+version: '3.7'
 
 services:
-  mobile:
+  servicews:
     build: .
-    image: wallbox/mobile
+    restart: always
     ports:
       - "3100:3100"
       - "3200:3200"
-    volumes:
-      - .:/srv/app
+    networks:
+      - wallbox-test
+  devicews1:
+    image: ardiadrianadri/devicews:1.0.1
+    depends_on: 
+      - servicews
+    environment: 
+      - BASE_WS_URL=ws://servicews:3200/chargers/
+      - DEVICE_ID=wABCD
+    networks: 
+      - wallbox-test
+  devicews2:
+    image: ardiadrianadri/devicews:1.0.1
+    depends_on: 
+      - servicews
+    environment: 
+      - BASE_WS_URL=ws://servicews:3200/chargers/
+      - DEVICE_ID=wABCE
+    networks: 
+      - wallbox-test
+  devicews3:
+    image: ardiadrianadri/devicews:1.0.1
+    depends_on: 
+      - servicews
+    environment: 
+      - BASE_WS_URL=ws://servicews:3200/chargers/
+      - DEVICE_ID=wABCF
+    networks: 
+      - wallbox-test
+  devicews4:
+    image: ardiadrianadri/devicews:1.0.1
+    depends_on: 
+      - servicews
+    environment: 
+      - BASE_WS_URL=ws://servicews:3200/chargers/
+      - DEVICE_ID=wABCG
+    networks: 
+      - wallbox-test
+  chargerws1:
+    image: ardiadrianadri/chargews:1.0.1
+    depends_on:
+      - servicews 
+      - devicews1
+    environment: 
+      - BASE_WS_URL=ws://servicews:3100/chargers/
+      - CHARGE_ID=c1234
+    networks: 
+      - wallbox-test
+  chargerws2:
+    image: ardiadrianadri/chargews:1.0.1
+    depends_on:
+      - servicews 
+      - devicews2
+    environment: 
+      - BASE_WS_URL=ws://servicews:3100/chargers/
+      - CHARGE_ID=c1235
+    networks: 
+      - wallbox-test
+  chargerws3:
+    image: ardiadrianadri/chargews:1.0.1
+    depends_on:
+      - servicews 
+      - devicews3
+    environment: 
+      - BASE_WS_URL=ws://servicews:3100/chargers/
+      - CHARGE_ID=c1236
+    networks: 
+      - wallbox-test
+  chargerws4:
+    image: ardiadrianadri/chargews:1.0.1
+    depends_on:
+      - servicews 
+      - devicews4
+    environment: 
+      - BASE_WS_URL=ws://servicews:3100/chargers/
+      - CHARGE_ID=c1237
+    networks: 
+      - wallbox-test
+
+networks:
+  wallbox-test:
