@@ -12,3 +12,5 @@ export enum chargeState {
   CHARGING80 = 'charging80',
   CHARGED = 'charged'
 }
+
+export const WEBSOCKET_EVENT_OUTPUT = 'StateOfCharge';
