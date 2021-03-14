@@ -2,7 +2,7 @@ import { Subscription } from 'rxjs';
 
 import { config } from '../config';
 import { WebsocketDatasource } from '../datasources';
-import { websocketMachineState, typeErrors } from '../constants';
+import { websocketMachineState, typeErrors, chargeState } from '../constants';
 import { ServerError } from '../utils';
 
 class DeviceRepository {
@@ -10,7 +10,7 @@ class DeviceRepository {
   private devicesOnline: { [deviceId: string]: WebsocketDatasource } = {};
   private devicesSubscription: { [deviceId: string]: Subscription } = {};
 
-  public sendChargerState(message: WsOutputMessage, deviceId: string): Promise<void> {
+  public sendChargerState(message: WsOutputMessage, deviceId: string): Promise<string> {
     return new Promise((resolve, reject) => {
         let tries = 0;
         if (!this.devicesOnline[deviceId]) {
@@ -36,8 +36,11 @@ class DeviceRepository {
             break;
             case websocketMachineState.MESSAGE_SENT:
               console.log(`[${deviceId}] Message sent to webSocket: ${JSON.stringify(wsState.payload)}`);
-              this.devicesOnline[deviceId].terminateConnection();
-              resolve()
+              const wsMessage: WsOutputMessage = JSON.parse((wsState.payload) ? wsState.payload.message : {});
+              if (wsMessage.data && wsMessage.data.status === chargeState.CHARGED) {
+                this.devicesOnline[deviceId].terminateConnection();
+              }
+              resolve((wsMessage.data) ? wsMessage.data.status: '');
             break;
             case websocketMachineState.ERROR_SENDING_MESSAGE:
               console.error(`[${deviceId}] Error sending message to device: ${JSON.stringify(wsState.payload || {})}`);
